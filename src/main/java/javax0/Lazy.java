@@ -21,13 +21,12 @@ public class Lazy<T> implements Supplier<T> {
         if (supplied) {
             return value;
         }
-        value = supplier.get();
         supplied = true;
-        return value;
+        return value = supplier.get();
     }
 
-    private Sync sync() {
-        return new Sync();
+    public static Lazy.Sync let() {
+        return let(null).new Sync();
     }
 
     public class Sync implements Supplier<T> {
@@ -36,7 +35,7 @@ public class Lazy<T> implements Supplier<T> {
         private volatile T synValue;
 
         public Sync sync(Supplier<T> supplier) {
-            return new Lazy(supplier).sync();
+            return new Lazy(supplier).new Sync();
         }
 
 

@@ -1,5 +1,7 @@
 package javax0;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
@@ -8,42 +10,54 @@ import java.util.function.Supplier;
 @SuppressWarnings("PointlessBooleanExpression")
 public class TestLazy {
     @Test
+    @DisplayName("Demonstrate shortcut without lazy support")
     void test1() {
         var ts = new TestSupport();
         if (false && ts.callMe()) {
-            System.out.println("true");
-        } else {
-            System.out.println("false");
+            Assertions.fail();
         }
-        System.out.println("invoked " + ts.count + " times");
+        Assertions.assertEquals(0, ts.count);
     }
 
     @Test
+    @DisplayName("Demonstrate missing shortcut without lazy")
     void test2() {
         var ts = new TestSupport();
         var z = ts.callMe();
         if (false && z) {
-            System.out.println("true");
-        } else {
-            System.out.println("false");
+            Assertions.fail();
         }
-        System.out.println("invoked " + ts.count + " times");
+        Assertions.assertEquals(1, ts.count);
     }
 
     @Test
+    @DisplayName("Demonstrate Lazy to be invoked only after shortcut and only once")
     void test3() {
         final var ts = new TestSupport();
         Supplier<Boolean> z = Lazy.let(() -> ts.callMe());
         if (false && z.get()) {
-            System.out.println("true");
-        } else {
-            System.out.println("false");
+            Assertions.fail();
         }
-        System.out.println("invoked " + ts.count + " times");
+        Assertions.assertEquals(0, ts.count);
         z.get();
-        System.out.println("invoked " + ts.count + " times");
+        Assertions.assertEquals(1, ts.count);
         z.get();
-        System.out.println("invoked " + ts.count + " times");
+        Assertions.assertEquals(1, ts.count);
+    }
+
+    @Test
+    @DisplayName("Demonstrate Lazy sync to be invoked only after shortcut and only once")
+    void test4() {
+        final var ts = new TestSupport();
+        Supplier<Boolean> z = Lazy.let().sync(() -> ts.callMe());
+        if (false && z.get()) {
+            Assertions.fail();
+        }
+        Assertions.assertEquals(0, ts.count);
+        z.get();
+        Assertions.assertEquals(1, ts.count);
+        z.get();
+        Assertions.assertEquals(1, ts.count);
     }
 
     private static class TestSupport {
