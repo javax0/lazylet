@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 public class Lazy<T> implements Supplier<T> {
 
-    final Supplier<T> supplier;
+    final private Supplier<T> supplier;
     private boolean supplied = false;
     private T value;
 
@@ -12,8 +12,12 @@ public class Lazy<T> implements Supplier<T> {
         this.supplier = supplier;
     }
 
-    public static <T> Lazy let(Supplier<T> supplier) {
+    public static <T> Lazy<T> let(Supplier<T> supplier) {
         return new Lazy(supplier);
+    }
+
+    public static <T> Lazy<T>.Sync<T> sync(Supplier<T> supplier) {
+        return new Lazy<>(supplier).new Sync<T>();
     }
 
     @Override
@@ -25,19 +29,10 @@ public class Lazy<T> implements Supplier<T> {
         return value = supplier.get();
     }
 
-    public static Lazy.Sync let() {
-        return let(null).new Sync();
-    }
+    public class Sync<T> implements Supplier<T> {
 
-    public class Sync implements Supplier<T> {
-
-        private volatile boolean synSupplied = false;
-        private volatile T synValue;
-
-        public Sync sync(Supplier<T> supplier) {
-            return new Lazy(supplier).new Sync();
-        }
-
+        private volatile boolean supplied = false;
+        private volatile T value;
 
         /**
          * Gets a result.
@@ -46,12 +41,16 @@ public class Lazy<T> implements Supplier<T> {
          */
         @Override
         public T get() {
-            if (synSupplied) {
-                return synValue;
+            if (supplied) {
+                return value;
             }
-            synValue = supplier.get();
-            synSupplied = true;
-            return synValue;
+            synchronized (this) {
+                if (supplied) {
+                    return value;
+                }
+                supplied = true;
+                return value = (T) supplier.get();
+            }
         }
     }
 }

@@ -4,11 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Supplier;
-
-
 @SuppressWarnings("PointlessBooleanExpression")
-public class TestLazy {
+class TestLazy {
     @Test
     @DisplayName("Demonstrate shortcut without lazy support")
     void test1() {
@@ -34,7 +31,7 @@ public class TestLazy {
     @DisplayName("Demonstrate Lazy to be invoked only after shortcut and only once")
     void test3() {
         final var ts = new TestSupport();
-        Supplier<Boolean> z = Lazy.let(() -> ts.callMe());
+        var z = Lazy.let(ts::callMe);
         if (false && z.get()) {
             Assertions.fail();
         }
@@ -49,7 +46,7 @@ public class TestLazy {
     @DisplayName("Demonstrate Lazy sync to be invoked only after shortcut and only once")
     void test4() {
         final var ts = new TestSupport();
-        Supplier<Boolean> z = Lazy.let().sync(() -> ts.callMe());
+        var z = Lazy.sync(ts::callMe);
         if (false && z.get()) {
             Assertions.fail();
         }
