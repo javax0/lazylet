@@ -31,8 +31,12 @@ Using
 you can write
 
 ```java
-var z = Lazy.let("Hello");
+var z = Lazy.let(()->"Hello");
 ```
+
+and then you can write `z.get()` to access to the value. The first time
+`get()` is invoked the supplier will be evaluated and any later time the
+already calculated value will be returned. 
 
 This is not part of the Java language but it is an extremely simple
 class. The use is simple as demonstrated in the unit tests:
@@ -60,3 +64,22 @@ Assertions.assertEquals(1, ts.count);
 z.get();
 Assertions.assertEquals(1, ts.count);
 ```
+
+What is a bit more, even if it may not be useful that you can say
+
+```java
+final var ts = new TestSupport();
+var z = Lazy.sync(ts::callMe);
+if (false && z.get()) {
+    Assertions.fail();
+}
+Assertions.assertEquals(0, ts.count);
+z.get();
+Assertions.assertEquals(1, ts.count);
+z.get();
+Assertions.assertEquals(1, ts.count);
+```
+
+to get a `Lazy` supplier that can be used by multiple threads and it is
+still guaranted that the supplier passed as argument is passed only
+once.
