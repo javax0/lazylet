@@ -32,6 +32,7 @@ public class Lazy<T> implements Supplier<T> {
     public class Sync<T> implements Supplier<T> {
 
         private volatile boolean supplied = false;
+        private volatile boolean preSupplied = false;
         private volatile T value;
 
         /**
@@ -45,11 +46,13 @@ public class Lazy<T> implements Supplier<T> {
                 return value;
             }
             synchronized (this) {
-                if (supplied) {
+                if (preSupplied) {
                     return value;
                 }
+                preSupplied = true;
+                value = (T) supplier.get();
                 supplied = true;
-                return value = (T) supplier.get();
+                return value;
             }
         }
     }
