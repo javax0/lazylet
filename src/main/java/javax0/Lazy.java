@@ -13,23 +13,23 @@ public class Lazy<T> implements Supplier<T> {
     }
 
     public static <T> Lazy<T> let(Supplier<T> supplier) {
-        return new Lazy(supplier);
+        return new Lazy<>(supplier);
     }
 
-    public static <T> Lazy<T>.Sync<T> sync(Supplier<T> supplier) {
-        return new Lazy<>(supplier).new Sync<T>();
+    public static <T> Lazy<T>.Sync sync(Supplier<T> supplier) {
+        return new Lazy<>(supplier).new Sync();
     }
 
     @Override
     public T get() {
-        if (supplied) {
-            return value;
+        if (!supplied) {
+            value = supplier.get();
+            supplied = true;
         }
-        supplied = true;
-        return value = supplier.get();
+        return value;
     }
 
-    public class Sync<T> implements Supplier<T> {
+    public class Sync implements Supplier<T> {
 
         private volatile boolean supplied = false;
         private volatile boolean preSupplied = false;
@@ -50,7 +50,7 @@ public class Lazy<T> implements Supplier<T> {
                     return value;
                 }
                 preSupplied = true;
-                value = (T) supplier.get();
+                value = supplier.get();
                 supplied = true;
                 return value;
             }
